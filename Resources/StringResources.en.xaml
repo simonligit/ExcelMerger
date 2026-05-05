@@ -10,15 +10,16 @@
 	<sys:String x:Key="MenuAbout">_About</sys:String>
 	
 	<sys:String x:Key="MenuAbout_AboutTitle">About Excel Professional Comparator</sys:String>
-	<sys:String x:Key="MenuAbout_Version">Version: 1.0.0</sys:String>
+	<sys:String x:Key="MenuAbout_Version">Version: 1.1.0</sys:String>
 	<sys:String x:Key="MenuAbout_Description">A professional tool for comparing differences between two Excel files.</sys:String>
 	<sys:String x:Key="MenuAbout_InstructionsTitle">Instructions:</sys:String>
 	<sys:String x:Key="MenuAbout_Instruction1">1. Drag and drop two files to compare immediately.</sys:String>
 	<sys:String x:Key="MenuAbout_Instruction2">2. Drag one file to preset the first comparison path.</sys:String>
 	<sys:String x:Key="MenuAbout_Instruction3">3. Use Ctrl+N to open the selection dialog at any time.</sys:String>
-	<sys:String x:Key="MenuAbout_Copyright">© 2026 Flybird Studio. All rights reserved.</sys:String>	
+    <sys:String x:Key="MenuAbout_Copyright">© 2026 Flybird Studio. All rights reserved.</sys:String>
+    <sys:String x:Key="PasswordRequired">The following file is encrypted:</sys:String>
 
-	<sys:String x:Key="SelectFilesDialog_Title">Select Files</sys:String>
+    <sys:String x:Key="SelectFilesDialog_Title">Select Files</sys:String>
 	<sys:String x:Key="SelectFilesDialog_Label1">Select first Excel file:</sys:String>
 	<sys:String x:Key="SelectFilesDialog_Label2">Select second Excel file:</sys:String>
 

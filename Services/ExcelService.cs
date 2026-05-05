@@ -1,8 +1,13 @@
 ﻿using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Spreadsheet;
 using ExcelMerger.Models;
+using NPOI;
+using NPOI.HSSF.UserModel;
+using NPOI.POIFS.Crypt;
+using NPOI.POIFS.Crypt.Standard;
+using NPOI.SS.UserModel;
+using NPOI.XSSF.UserModel;
 using System;
-using System.Collections.Generic;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -17,59 +22,33 @@ namespace ExcelMerger.Services
         public List<ExcelSheetModel> ReadExcelContent(string filePath)
         {
             var sheets = new List<ExcelSheetModel>();
+            IWorkbook workbook = null;
+            string password = null;
 
             try
             {
-                // Using 确保文件读取后正确关闭资源
-                // 1. 使用 FileStream 以共享模式打开文件
-                // FileMode.Open: 打开现有文件
-                // FileAccess.Read: 仅请求读取权限
-                // FileShare.ReadWrite: 允许其他进程同时进行读写操作（这是解决 Excel 占用问题的关键）
-                using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                // 第一次尝试：无密码打开
+                workbook = OpenWorkbook(filePath, null);
+            }
+            catch (NPOI.EncryptedDocumentException)
+            {
+                // 获取纯文件名（含路径）
+                string fileName = System.IO.Path.GetFullPath(filePath);
+
+                Application.Current.Dispatcher.Invoke(() =>
                 {
-                    // 2. 将文件流传递给 XLWorkbook
-                    using (var workbook = new XLWorkbook(stream))
+                    // 传递文件名给构造函数
+                    var pwdDlg = new PasswordDialog(fileName) { Owner = Application.Current.MainWindow };
+                    if (pwdDlg.ShowDialog() == true)
                     {
-                        // 3. 遍历所有工作表 (Sheet)
-                        foreach (var worksheet in workbook.Worksheets)
-                        {
-                            var sheetModel = new ExcelSheetModel { SheetName = worksheet.Name };
-                            var range = worksheet.RangeUsed();
-
-                            if (range != null)
-                            {
-                                // 找到当前工作表中最右侧有数据的列号
-                                int maxColumnInSheet = range.LastColumn().ColumnNumber();
-                                sheetModel.MaxColumnCount = maxColumnInSheet;
-
-                                // 找到该表数据范围的最后一列，确保每一行读取的列数一致
-                                // int lastColumn = worksheet.LastColumnUsed().ColumnNumber();
-
-                                // 遍历该表中有数据的所有行
-                                var rowOriginalIndex = 1;
-                                foreach (var row in worksheet.RowsUsed())
-                                {
-                                    var rowModel = new ExcelRowModel();
-                                    rowModel.OriginalIndex = rowOriginalIndex++;
-
-                                    // 遍历从第 1 列到最后一列的所有单元格
-                                    for (int i = 1; i <= maxColumnInSheet; i++)
-                                    {
-                                        // 如果某一行比其他行短，GetString() 依然能安全处理
-                                        string cellValue = row.Cell(i).GetString().Trim();
-                                        rowModel.Cells.Add(cellValue);
-                                    }
-
-                                    sheetModel.Rows.Add(rowModel);
-                                }
-                            }
-
-                            sheets.Add(sheetModel);
-                        }
+                        password = pwdDlg.Password;
                     }
-                            
+                });
 
-                }
+                if (password == null) return sheets;
+
+                // 第二次尝试：带密码打开（会自动重新建立流，避免 closed file 错误）
+                workbook = OpenWorkbook(filePath, password);
             }
             catch (System.IO.IOException ex)
             {
@@ -81,8 +60,68 @@ namespace ExcelMerger.Services
                 MessageBox.Show($"发生意外错误: {ex.Message}", "错误");
             }
 
+            if (workbook != null)
+            {
+                ExtractData(workbook, sheets);
+                workbook.Close();
+            }
+
             return sheets;
         }
-    }
 
+        // 辅助方法：确保每次调用都创建新鲜的流，防止流关闭问题
+        private IWorkbook OpenWorkbook(string path, string password)
+        {
+            // Using 确保文件读取后正确关闭资源
+            // 1. 使用 FileStream 以共享模式打开文件
+            // FileMode.Open: 打开现有文件
+            // FileAccess.Read: 仅请求读取权限
+            // FileShare.ReadWrite: 允许其他进程同时进行读写操作（这是解决 Excel 占用问题的关键）
+            using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            {
+                return WorkbookFactory.Create(fs, password);
+            }
+        }
+
+        private void ExtractData(IWorkbook workbook, List<ExcelSheetModel> sheets)
+        {
+            // 3. 遍历所有工作表 (Sheet)
+            for (int i = 0; i < workbook.NumberOfSheets; i++)
+            {
+                ISheet sheet = workbook.GetSheetAt(i);
+                var sheetModel = new ExcelSheetModel { SheetName = sheet.SheetName };
+                int lastRowNum = sheet.LastRowNum;
+                int maxCol = 0;
+
+                // 预扫描获取最大列数
+                for (int r = 0; r <= lastRowNum; r++)
+                {
+                    IRow row = sheet.GetRow(r);
+                    if (row != null && row.LastCellNum > maxCol) maxCol = row.LastCellNum;
+                }
+                sheetModel.MaxColumnCount = maxCol;
+
+                // 遍历该表中有数据的所有行
+                for (int r = 0; r <= lastRowNum; r++)
+                {
+                    IRow row = sheet.GetRow(r);
+                    var rowModel = new ExcelRowModel { OriginalIndex = r + 1 };
+
+                    // 遍历从第 1 列到最后一列的所有单元格
+                    for (int c = 0; c < maxCol; c++)
+                    {
+                        string cellValue = "";
+                        if (row != null)
+                        {
+                            ICell cell = row.GetCell(c);
+                            cellValue = cell?.ToString() ?? "";
+                        }
+                        rowModel.Cells.Add(cellValue.Trim());
+                    }
+                    sheetModel.Rows.Add(rowModel);
+                }
+                sheets.Add(sheetModel);
+            }
+        }
+    }
 }
