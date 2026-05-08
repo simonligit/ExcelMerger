@@ -11,13 +11,16 @@
     <ApplicationIcon>Resources\app_icon.ico</ApplicationIcon>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Include=".github\copilot-instructions.md" />
+  </ItemGroup>
+
   <!-- Ensure the icon file is included in the project as None (required for ApplicationIcon) -->
   <ItemGroup>
     <Resource Include="Resources\app_icon.ico" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="ClosedXML" Version="0.105.0" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="NPOI" Version="2.8.0" />
   </ItemGroup>

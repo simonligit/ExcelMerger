@@ -8,28 +8,26 @@
     <sys:String x:Key="MenuHelp">帮助(_H)</sys:String>
     <sys:String x:Key="MenuLanguage">语言(_L)</sys:String>
     <sys:String x:Key="MenuAbout">关于(_A)</sys:String>
-    <sys:String x:Key="MenuAbout_AboutTitle">关于 Excel 专业比对工具</sys:String>
     
-    <sys:String x:Key="MenuAbout_Version">版本: 1.1.0</sys:String>
+    <sys:String x:Key="MenuAbout_AboutTitle">关于 Excel 专业比对工具</sys:String>
+    <sys:String x:Key="MenuAbout_Version">版本: 1.1.1</sys:String>
     <sys:String x:Key="MenuAbout_Description">一款用于比对两个 Excel 文件差异的专业工具。</sys:String>
     <sys:String x:Key="MenuAbout_InstructionsTitle">使用说明:</sys:String>
     <sys:String x:Key="MenuAbout_Instruction1">1. 拖放两个文件可立即开始比对。</sys:String>
     <sys:String x:Key="MenuAbout_Instruction2">2. 拖放单个文件可预设第一个比对路径。</sys:String>
     <sys:String x:Key="MenuAbout_Instruction3">3. 随时使用 Ctrl+N 快捷键打开选择对话框。</sys:String>
     <sys:String x:Key="MenuAbout_Copyright">© 2026 Flybird 工作室。保留所有权利。</sys:String>
-    <sys:String x:Key="PasswordRequired">以下文件已加密，请输入密码：</sys:String>
 
     <sys:String x:Key="SelectFilesDialog_Title">选择文件</sys:String>
-    <sys:String x:Key="SelectFilesDialog_Label1">选择第一个 Excel 文件：</sys:String>
-    <sys:String x:Key="SelectFilesDialog_Label2">选择第二个 Excel 文件：</sys:String>
-
-    <sys:String x:Key="StatusReady">准备就绪</sys:String>
+    <sys:String x:Key="SelectFilesDialog_Label1">选择左侧 Excel 文件：</sys:String>
+    <sys:String x:Key="SelectFilesDialog_Label2">选择右侧 Excel 文件：</sys:String>
     <sys:String x:Key="BtnBrowse">浏览...</sys:String>
     <sys:String x:Key="BtnSwap">↑↓ 交换顺序</sys:String>
     <sys:String x:Key="BtnOk">确定</sys:String>
     <sys:String x:Key="BtnCancel">取消</sys:String>
-
+    <sys:String x:Key="Hint_PasteOrBrowse_FilePath">可在此粘贴或输入完整路径，或点击 浏览/拖入文件。</sys:String>
     <sys:String x:Key="HintStart">请点击 文件 → 新建 开始比较文件</sys:String>
+    <sys:String x:Key="PasswordRequired">以下文件已加密，请输入密码：</sys:String>
 
     <sys:String x:Key="KeyColumnsLabel">关键字列设置:</sys:String>
     <sys:String x:Key="BtnReCompare">重新比对</sys:String>
@@ -39,6 +37,7 @@
     <sys:String x:Key="StatusSelectFiles">请选择两个 Excel 文件进行比对</sys:String>
     <sys:String x:Key="StatusProcessing">正在处理文件，请稍候...</sys:String>
     <sys:String x:Key="StatusCompleted">比较完成！</sys:String>
+    <sys:String x:Key="StatusReady">准备就绪</sys:String>
 
     <sys:String x:Key="ErrorFormat">错误: {0}</sys:String>
     <sys:String x:Key="UnexpectedErrorFormat">发生意外错误: {0}</sys:String>
@@ -55,4 +54,8 @@
     <sys:String x:Key="CompareFailedFormat">比对失败: {0}</sys:String>
 
     <sys:String x:Key="SwitchLanguageFailedFormat">切换语言失败: {0}</sys:String>
+
+    <sys:String x:Key="Label_LeftFile">左侧：</sys:String>
+    <sys:String x:Key="Label_RightFile">右侧：</sys:String>
+
 </ResourceDictionary>

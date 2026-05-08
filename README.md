@@ -7,6 +7,7 @@ This project is developped using Visual Studio 2026, C# and DotNet 10.0. It's a 
 The first version was developed from 20260106 to 20260110 in my spare time.
 
 V 1.1.0 (2026-05-05) - Add support for password-protected Excel files.
+V 1.1.1 (2026-05-08) - Display file path in main window. Make file name input text editable in Open File Dialog.
 
 ## Features
 - Compare two Excel files and highlight differences.

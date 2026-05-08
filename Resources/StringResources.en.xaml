@@ -10,28 +10,26 @@
 	<sys:String x:Key="MenuAbout">_About</sys:String>
 	
 	<sys:String x:Key="MenuAbout_AboutTitle">About Excel Professional Comparator</sys:String>
-	<sys:String x:Key="MenuAbout_Version">Version: 1.1.0</sys:String>
+	<sys:String x:Key="MenuAbout_Version">Version: 1.1.1</sys:String>
 	<sys:String x:Key="MenuAbout_Description">A professional tool for comparing differences between two Excel files.</sys:String>
 	<sys:String x:Key="MenuAbout_InstructionsTitle">Instructions:</sys:String>
 	<sys:String x:Key="MenuAbout_Instruction1">1. Drag and drop two files to compare immediately.</sys:String>
 	<sys:String x:Key="MenuAbout_Instruction2">2. Drag one file to preset the first comparison path.</sys:String>
 	<sys:String x:Key="MenuAbout_Instruction3">3. Use Ctrl+N to open the selection dialog at any time.</sys:String>
     <sys:String x:Key="MenuAbout_Copyright">© 2026 Flybird Studio. All rights reserved.</sys:String>
-    <sys:String x:Key="PasswordRequired">The following file is encrypted:</sys:String>
 
     <sys:String x:Key="SelectFilesDialog_Title">Select Files</sys:String>
 	<sys:String x:Key="SelectFilesDialog_Label1">Select first Excel file:</sys:String>
 	<sys:String x:Key="SelectFilesDialog_Label2">Select second Excel file:</sys:String>
-
-	<sys:String x:Key="StatusReady">Ready</sys:String>
 	<sys:String x:Key="BtnBrowse">Browse...</sys:String>
     <sys:String x:Key="BtnSwap">↑↓ Swap Order</sys:String>
     <sys:String x:Key="BtnOk">OK</sys:String>
     <sys:String x:Key="BtnCancel">Cancel</sys:String>
+    <sys:String x:Key="Hint_PasteOrBrowse_FilePath">You can paste or type a full path here, or click Browse / drop a file.</sys:String>
+    <sys:String x:Key="HintStart">Click File → New to start comparing files</sys:String>
+    <sys:String x:Key="PasswordRequired">The following file is encrypted:</sys:String>
 
-	<sys:String x:Key="HintStart">Click File → New to start comparing files</sys:String>
-
-	<sys:String x:Key="KeyColumnsLabel">Key column settings:</sys:String>
+    <sys:String x:Key="KeyColumnsLabel">Key column settings:</sys:String>
 	<sys:String x:Key="BtnReCompare">Recompare</sys:String>
 
 	<sys:String x:Key="ColumnHeaderFormat">Col {0}</sys:String>
@@ -39,8 +37,9 @@
 	<sys:String x:Key="StatusSelectFiles">Please select two Excel files to compare</sys:String>
 	<sys:String x:Key="StatusProcessing">Processing files, please wait...</sys:String>
 	<sys:String x:Key="StatusCompleted">Comparison completed!</sys:String>
+    <sys:String x:Key="StatusReady">Ready</sys:String>
 
-	<sys:String x:Key="ErrorFormat">Error: {0}</sys:String>
+    <sys:String x:Key="ErrorFormat">Error: {0}</sys:String>
 	<sys:String x:Key="UnexpectedErrorFormat">Unexpected error: {0}</sys:String>
 
 	<sys:String x:Key="DragDrop_InvalidTwo">Please make sure both dropped files are Excel files.</sys:String>
@@ -55,4 +54,8 @@
 	<sys:String x:Key="CompareFailedFormat">Compare failed: {0}</sys:String>
 
 	<sys:String x:Key="SwitchLanguageFailedFormat">Switch language failed: {0}</sys:String>
+
+    <sys:String x:Key="Label_LeftFile">(&lt;-)</sys:String>
+    <sys:String x:Key="Label_RightFile">(-&gt;)</sys:String>
+
 </ResourceDictionary>

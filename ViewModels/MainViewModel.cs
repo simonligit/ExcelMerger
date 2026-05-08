@@ -1,6 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using DocumentFormat.OpenXml.Spreadsheet;
 using ExcelMerger.Models;
 using ExcelMerger.Services;
 using ExcelMerger.Utils;
@@ -35,6 +34,13 @@ namespace ExcelMerger.ViewModels
         [ObservableProperty]
         private ObservableCollection<SheetComparisonViewModel> _sheets = new();
 
+        // NEW: expose full file paths used for comparison (shown at top-level)
+        [ObservableProperty]
+        private string _leftFilePath = string.Empty;
+
+        [ObservableProperty]
+        private string _rightFilePath = string.Empty;
+
         public MainViewModel()
         {
             // initialize with localized default message
@@ -45,6 +51,10 @@ namespace ExcelMerger.ViewModels
         {
             try
             {
+                // set the full paths immediately so UI can show them while processing
+                LeftFilePath = path1 ?? string.Empty;
+                RightFilePath = path2 ?? string.Empty;
+
                 IsBusy = true;
                 HasData = false; // 开始处理时先重置状态
                 StatusMessage = LocalizationHelper.Get("StatusProcessing");

@@ -13,6 +13,9 @@ obj/
 # VSCode
 .vscode/
 
+# GitHub Copilot
+.github
+
 # NuGet
 packages/
 *.nupkg

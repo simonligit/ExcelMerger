@@ -12,21 +12,24 @@
         <TextBlock Text="{DynamicResource SelectFilesDialog_Label1}"/>
         <DockPanel Margin="0,5,0,10">
             <Button Content="{DynamicResource BtnBrowse}" Click="BrowseFile1_Click" DockPanel.Dock="Right" Width="75"/>
-            <TextBox x:Name="TxtFile1" IsReadOnly="True" Margin="0,0,5,0"/>
+            <!-- made editable and allow dropping/pasting; tooltip hints user can paste -->
+            <TextBox x:Name="TxtFile1" IsReadOnly="False" AllowDrop="True" Margin="0,0,5,0"
+                     ToolTip="{DynamicResource Hint_PasteOrBrowse_FilePath}"/>
         </DockPanel>
 
         <Button Content="{DynamicResource BtnSwap}" 
-        HorizontalAlignment="Right" 
-        Margin="0,0,80,5" 
-        Padding="10,2"
-        FontSize="11"
-        Click="SwapFiles_Click" 
-        Background="#F0F0F0"/>
+                HorizontalAlignment="Right" 
+                Margin="0,0,80,5" 
+                Padding="10,2"
+                FontSize="11"
+                Click="SwapFiles_Click" 
+                Background="#F0F0F0"/>
 
         <TextBlock Text="{DynamicResource SelectFilesDialog_Label2}"/>
         <DockPanel Margin="0,5,0,10">
             <Button Content="{DynamicResource BtnBrowse}" Click="BrowseFile2_Click" DockPanel.Dock="Right" Width="75"/>
-            <TextBox x:Name="TxtFile2" IsReadOnly="True" Margin="0,0,5,0"/>
+            <TextBox x:Name="TxtFile2" IsReadOnly="False" AllowDrop="True" Margin="0,0,5,0"
+                     ToolTip="{DynamicResource Hint_PasteOrBrowse_FilePath}"/>
         </DockPanel>
 
         <UniformGrid Columns="2" Margin="0,10,0,0">

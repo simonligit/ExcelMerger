@@ -42,6 +42,17 @@
         <ProgressBar DockPanel.Dock="Top" Height="10" IsIndeterminate="True" 
                      Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}"/>
 
+        <!-- show full file paths above the main content (same top-level placement as ProgressBar) -->
+        <Border DockPanel.Dock="Top" Background="#F7F7F7" Padding="6">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="{DynamicResource Label_LeftFile}" FontWeight="Bold" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding LeftFilePath}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding LeftFilePath}" Width="420"/>
+                <TextBlock Text=" | " Width="8"/>
+                <TextBlock Text="{DynamicResource Label_RightFile}" FontWeight="Bold" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding RightFilePath}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding RightFilePath}" Width="420"/>
+            </StackPanel>
+        </Border>
+
         <StatusBar DockPanel.Dock="Bottom">
             <StatusBarItem Content="{DynamicResource StatusReady}"/>
         </StatusBar>
