@@ -189,5 +189,63 @@ namespace ExcelMerger.Services
             };
         }
 
+        /// <summary>
+        /// 列模式：将工作表转置为“列模型”列表。每个 ExcelRowModel 代表原始文件的一列，
+        /// Cells[r] 即第 r 行该列的值，OriginalIndex 为原始列号（从 1 开始）。
+        /// 转置后即可复用 LcsCompare 按列比对（关键字索引对应原始行号-1）。
+        /// </summary>
+        public List<ExcelRowModel> SheetToColumns(ExcelSheetModel sheet)
+        {
+            var columns = new List<ExcelRowModel>();
+            var rows = sheet?.Rows ?? new List<ExcelRowModel>();
+            int colCount = sheet?.MaxColumnCount ?? 0;
+
+            for (int c = 0; c < colCount; c++)
+            {
+                var column = new ExcelRowModel { OriginalIndex = c + 1 };
+                for (int r = 0; r < rows.Count; r++)
+                {
+                    column.Cells.Add(c < rows[r].Cells.Count ? rows[r].Cells[c] : string.Empty);
+                }
+                columns.Add(column);
+            }
+            return columns;
+        }
+
+        /// <summary>
+        /// 列模式：将对齐后的列模型转置回“显示行”，恢复原始行列方向用于 DataGrid 显示。
+        /// 同时把每列的状态写入行的 ColumnStatusMap（整列高亮），
+        /// 并把修改列中发生变化的单元格（行索引）记入 DiffColumnIndices（文字变红加粗）。
+        /// </summary>
+        public List<ExcelRowModel> ColumnsToRows(List<ExcelRowModel> alignedColumns)
+        {
+            var displayRows = new List<ExcelRowModel>();
+
+            // 显示行数 = 该侧文件原始行数（占位列的 Cells 数即为本侧行数）
+            int rowCount = 0;
+            foreach (var col in alignedColumns)
+            {
+                rowCount = Math.Max(rowCount, col.Cells.Count);
+            }
+
+            for (int r = 0; r < rowCount; r++)
+            {
+                var row = new ExcelRowModel { OriginalIndex = r + 1 };
+                for (int c = 0; c < alignedColumns.Count; c++)
+                {
+                    var col = alignedColumns[c];
+                    row.Cells.Add(r < col.Cells.Count ? col.Cells[r] : string.Empty);
+                    row.ColumnStatusMap[c] = col.Status ?? StatusCodes.Same;
+
+                    if (col.Status == StatusCodes.Modified && col.DiffColumnIndices.Contains(r))
+                    {
+                        row.DiffColumnIndices.Add(c);
+                    }
+                }
+                displayRows.Add(row);
+            }
+            return displayRows;
+        }
+
     }
 }

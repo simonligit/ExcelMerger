@@ -10,7 +10,7 @@
     <sys:String x:Key="MenuAbout">关于(_A)</sys:String>
     
     <sys:String x:Key="MenuAbout_AboutTitle">关于 Excel 专业比对工具</sys:String>
-    <sys:String x:Key="MenuAbout_Version">版本: 1.1.1</sys:String>
+    <sys:String x:Key="MenuAbout_Version">版本: 1.2.0</sys:String>
     <sys:String x:Key="MenuAbout_Description">一款用于比对两个 Excel 文件差异的专业工具。</sys:String>
     <sys:String x:Key="MenuAbout_InstructionsTitle">使用说明:</sys:String>
     <sys:String x:Key="MenuAbout_Instruction1">1. 拖放两个文件可立即开始比对。</sys:String>
@@ -19,8 +19,8 @@
     <sys:String x:Key="MenuAbout_Copyright">© 2026 Flybird 工作室。保留所有权利。</sys:String>
 
     <sys:String x:Key="SelectFilesDialog_Title">选择文件</sys:String>
-    <sys:String x:Key="SelectFilesDialog_Label1">选择左侧 Excel 文件：</sys:String>
-    <sys:String x:Key="SelectFilesDialog_Label2">选择右侧 Excel 文件：</sys:String>
+    <sys:String x:Key="SelectFilesDialog_Label1">选择左侧/上方 Excel 文件：</sys:String>
+    <sys:String x:Key="SelectFilesDialog_Label2">选择右侧/下方 Excel 文件：</sys:String>
     <sys:String x:Key="BtnBrowse">浏览...</sys:String>
     <sys:String x:Key="BtnSwap">↑↓ 交换顺序</sys:String>
     <sys:String x:Key="BtnOk">确定</sys:String>
@@ -30,9 +30,15 @@
     <sys:String x:Key="PasswordRequired">以下文件已加密，请输入密码：</sys:String>
 
     <sys:String x:Key="KeyColumnsLabel">关键字列设置:</sys:String>
+    <sys:String x:Key="KeyRowsLabel">关键行设置:</sys:String>
     <sys:String x:Key="BtnReCompare">重新比对</sys:String>
 
+    <sys:String x:Key="CompareModeLabel">对比模式：</sys:String>
+    <sys:String x:Key="RowModeLabel">行模式</sys:String>
+    <sys:String x:Key="ColumnModeLabel">列模式</sys:String>
+
     <sys:String x:Key="ColumnHeaderFormat">列 {0}</sys:String>
+    <sys:String x:Key="RowHeaderFormat">行 {0}</sys:String>
 
     <sys:String x:Key="StatusSelectFiles">请选择两个 Excel 文件进行比对</sys:String>
     <sys:String x:Key="StatusProcessing">正在处理文件，请稍候...</sys:String>
@@ -55,7 +61,7 @@
 
     <sys:String x:Key="SwitchLanguageFailedFormat">切换语言失败: {0}</sys:String>
 
-    <sys:String x:Key="Label_LeftFile">左侧：</sys:String>
-    <sys:String x:Key="Label_RightFile">右侧：</sys:String>
+    <sys:String x:Key="Label_LeftFile">左侧/上方：</sys:String>
+    <sys:String x:Key="Label_RightFile">右侧/下方：</sys:String>
 
 </ResourceDictionary>

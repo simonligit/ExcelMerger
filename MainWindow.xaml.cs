@@ -5,6 +5,7 @@ using ExcelMerger.Models;
 using ExcelMerger.ViewModels;
 using ExcelMerger.Utils;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows;
@@ -68,6 +69,13 @@ namespace ExcelMerger
                                     MessageBoxImage.Error);
                 }
             });
+
+            // 列模式下重新比对完成后，对齐列数/表头可能已变化，
+            // 而绑定集合是原地更新的（不会重新触发生成列），需主动重建 DataGrid 列
+            WeakReferenceMessenger.Default.Register<SheetRebuiltMessage>(this, (r, m) =>
+            {
+                RebuildColumnsForSelectedTab(m.Value);
+            });
         }
         private void MenuItem_New_Click(object sender, RoutedEventArgs e)
         {
@@ -88,6 +96,7 @@ namespace ExcelMerger
         {
             // 1. 拦截并取消不需要显示的辅助属性列。因为 DataGrid 默认会根据 ExcelRowModel 中的所有公开属性自动生成列。
             if (e.PropertyName == "DiffColumnIndices" ||
+                e.PropertyName == "ColumnStatusMap" ||
                 e.PropertyName == "OriginalIndex" ||
                 e.PropertyName == "Status" ||
                 e.PropertyName == "IsDifferent")
@@ -98,57 +107,110 @@ namespace ExcelMerger
             }
 
             // 2. 核心逻辑：处理 Cells 属性
-            if (e.PropertyName == "Cells")
+            if (e.PropertyName == "Cells" && sender is DataGrid dg)
             {
                 // 取消对 Cells 列表本身的默认生成（默认只会生成一个长度列）
                 e.Cancel = true;
 
-                var dg = sender as DataGrid;
-                // 在生成新列前，先清空现有的列集合
-                // 这样可以确保每次切换 Tab 时，列数都能根据当前 Sheet 的 MaxColumns 重新构建
-                dg.Columns.Clear();
+                BuildColumnsForGrid(dg);
+            }
+        }
 
-                // 获取当前 DataGrid 所在 Tab 页的数据模型
-                if (dg.DataContext is SheetComparisonViewModel viewModel)
+        // 为指定 DataGrid 重建所有内容列（首次生成、切换 Tab、列模式重新比对后调用）
+        private void BuildColumnsForGrid(DataGrid dg)
+        {
+            // 获取当前 DataGrid 所在 Tab 页的数据模型
+            if (dg == null || dg.DataContext is not SheetComparisonViewModel viewModel) return;
+
+            // 在生成新列前，先清空现有的列集合
+            // 这样可以确保每次切换 Tab 时，列数都能根据当前 Sheet 的 MaxColumns 重新构建
+            dg.Columns.Clear();
+
+            if (viewModel.IsColumnMode)
+            {
+                BuildColumnModeColumns(dg, viewModel);
+            }
+            else
+            {
+                BuildRowModeColumns(dg, viewModel);
+            }
+        }
+
+        // 行模式：按顺序生成列，差异单元格文字变红加粗
+        private void BuildRowModeColumns(DataGrid dg, SheetComparisonViewModel viewModel)
+        {
+            var cellDiffConverter = new CellDiffConverter(); // 实例化转换器
+
+            // 使用我们封装好的 MaxColumns
+            for (int i = 0; i < viewModel.MaxColumns; i++)
+            {
+                // 创建一个新列
+                var column = new DataGridTextColumn
                 {
-                    var cellDiffConverter = new CellDiffConverter(); // 实例化转换器
+                    // 设置表头，例如 "Col 1", "Col 2" 或直接用字母 A, B, C
+                    Header = LocalizationHelper.GetFormat("ColumnHeaderFormat", i + 1),
+                    // 高级绑定技巧：绑定到 Cells 列表的特定索引
+                    Binding = new Binding($"Cells[{i}]")
+                };
 
-                    // 使用我们封装好的 MaxColumns
-                    for (int i = 0; i < viewModel.MaxColumns; i++)
-                    {
-                        // 创建一个新列
-                        var column = new DataGridTextColumn
-                        {
-                            // 设置表头，例如 "Col 1", "Col 2" 或直接用字母 A, B, C
-                            Header = LocalizationHelper.GetFormat("ColumnHeaderFormat", i + 1),
-                            // 高级绑定技巧：绑定到 Cells 列表的特定索引
-                            Binding = new Binding($"Cells[{i}]")
-                        };
+                // 设置单元格样式：如果是差异列，文字变红并加粗
+                var cellStyle = new Style(typeof(DataGridCell));
 
-                        // 设置单元格样式：如果是差异列，文字变红并加粗
-                        var cellStyle = new Style(typeof(DataGridCell));
+                // 1. 定义公共的 MultiBinding 结构
+                Func<string, MultiBinding> createMultiBinding = (param) => {
+                    // 多重绑定：需要行对象和当前列索引
+                    var mb = new MultiBinding { Converter = cellDiffConverter, ConverterParameter = param };
+                    mb.Bindings.Add(new Binding(".")); // 绑定到 RowModel
+                    mb.Bindings.Add(new Binding { Source = i }); // 传入当前列索引 i
+                    return mb;
+                };
 
-                        // 1. 定义公共的 MultiBinding 结构
-                        Func<string, MultiBinding> createMultiBinding = (param) => {
-                            // 多重绑定：需要行对象和当前列索引
-                            var mb = new MultiBinding { Converter = cellDiffConverter, ConverterParameter = param };
-                            mb.Bindings.Add(new Binding(".")); // 绑定到 RowModel
-                            mb.Bindings.Add(new Binding { Source = i }); // 传入当前列索引 i
-                            return mb;
-                        };
+                // 2. 绑定前景色 (文字变红)
+                cellStyle.Setters.Add(new Setter(DataGridCell.ForegroundProperty, createMultiBinding("Foreground")));
 
-                        // 2. 绑定前景色 (文字变红)
-                        cellStyle.Setters.Add(new Setter(DataGridCell.ForegroundProperty, createMultiBinding("Foreground")));
+                // 3. 绑定粗细 (文字加粗)
+                cellStyle.Setters.Add(new Setter(DataGridCell.FontWeightProperty, createMultiBinding("Weight")));
 
-                        // 3. 绑定粗细 (文字加粗)
-                        cellStyle.Setters.Add(new Setter(DataGridCell.FontWeightProperty, createMultiBinding("Weight")));
+                column.CellStyle = cellStyle;
 
-                        column.CellStyle = cellStyle;
+                dg.Columns.Add(column);
+            }
+        }
 
-                        dg.Columns.Add(column);
-                    }
-                }
+        // 列模式：表头使用原始列号，整列按对齐状态着色，修改列中的差异单元格文字变红加粗
+        private void BuildColumnModeColumns(DataGrid dg, SheetComparisonViewModel viewModel)
+        {
+            var columnCellConverter = new ColumnCellConverter();
 
+            for (int i = 0; i < viewModel.MaxColumns; i++)
+            {
+                var column = new DataGridTextColumn
+                {
+                    // 表头优先使用构建时记录的原始列号（如 "Col 3"），否则回退到顺序编号
+                    Header = (viewModel.ColumnHeaderLabels != null && i < viewModel.ColumnHeaderLabels.Count)
+                        ? viewModel.ColumnHeaderLabels[i]
+                        : LocalizationHelper.GetFormat("ColumnHeaderFormat", i + 1),
+                    Binding = new Binding($"Cells[{i}]")
+                };
+
+                var cellStyle = new Style(typeof(DataGridCell));
+
+                Func<string, MultiBinding> createMultiBinding = (param) => {
+                    var mb = new MultiBinding { Converter = columnCellConverter, ConverterParameter = param };
+                    mb.Bindings.Add(new Binding(".")); // 绑定到 RowModel（含 ColumnStatusMap）
+                    mb.Bindings.Add(new Binding { Source = i }); // 传入当前列索引 i
+                    return mb;
+                };
+
+                // 整列背景：新增/删除/修改/占位 列分别着色
+                cellStyle.Setters.Add(new Setter(DataGridCell.BackgroundProperty, createMultiBinding("Background")));
+                // 差异单元格：文字变红并加粗
+                cellStyle.Setters.Add(new Setter(DataGridCell.ForegroundProperty, createMultiBinding("Foreground")));
+                cellStyle.Setters.Add(new Setter(DataGridCell.FontWeightProperty, createMultiBinding("Weight")));
+
+                column.CellStyle = cellStyle;
+
+                dg.Columns.Add(column);
             }
         }
 
@@ -205,6 +267,30 @@ namespace ExcelMerger
             return null;
         }
 
+        // 辅助函数：在控件的视觉树中查找所有指定类型的子控件
+        private List<T> FindVisualChildren<T>(DependencyObject parent) where T : DependencyObject
+        {
+            var result = new List<T>();
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is T t) result.Add(t);
+                result.AddRange(FindVisualChildren<T>(child));
+            }
+            return result;
+        }
+
+        // 重建当前 Tab 内所有 DataGrid 的列（列模式重新比对后调用）
+        private void RebuildColumnsForSelectedTab(SheetComparisonViewModel sheetVM)
+        {
+            if (!ReferenceEquals(MainTabControl.SelectedItem, sheetVM)) return;
+
+            foreach (var dg in FindVisualChildren<DataGrid>(MainTabControl))
+            {
+                BuildColumnsForGrid(dg);
+            }
+        }
+
         private void DataGrid_LoadingRow(object sender, DataGridRowEventArgs e)
         {
             // 强制刷新 Header 避免虚拟化复用导致的行号错乱
@@ -234,8 +320,6 @@ namespace ExcelMerger
             // 2. 计算目标行索引
             int targetIndex = (int)(percent * sheetVm.LeftRows.Count);
 
-            // 通过当前 Tab 的 Content 找到 LeftDataGrid
-            var contentPresenter = MainTabControl.Template.FindName("PART_SelectedContentHost", MainTabControl) as ContentPresenter;
             var dataGrid = GetVisualChild<DataGrid>(MainTabControl); // 查找当前激活的 DataGrid
 
             if (dataGrid != null && targetIndex >= 0 && targetIndex < dataGrid.Items.Count)
@@ -243,21 +327,54 @@ namespace ExcelMerger
                 dataGrid.ScrollIntoView(dataGrid.Items[targetIndex]);
             }
         }
+
+        // 水平 Minimap（列模式）：点击定位到对应列
+        private void MinimapHorizontal_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            var minimapGrid = sender as FrameworkElement;
+            // 获取当前选中的 Sheet
+            var sheetVm = MainTabControl.SelectedItem as SheetComparisonViewModel;
+            if (sheetVm == null || sheetVm.ColumnStatuses.Count == 0) return;
+
+            // 1. 计算点击位置占总宽度的百分比
+            Point clickPoint = e.GetPosition(minimapGrid);
+            double percent = clickPoint.X / minimapGrid.ActualWidth;
+
+            // 2. 计算目标列索引
+            int targetIndex = (int)(percent * sheetVm.ColumnStatuses.Count);
+
+            var dataGrid = GetVisualChild<DataGrid>(MainTabControl); // 查找当前激活的 DataGrid
+            if (dataGrid == null || targetIndex < 0 || targetIndex >= dataGrid.Columns.Count) return;
+
+            // 3. 按目标列之前的列宽累加估算偏移量，水平滚动到目标列
+            double targetOffset = dataGrid.Columns.Take(targetIndex).Sum(c => c.ActualWidth);
+            var scrollViewer = GetVisualChild<ScrollViewer>(dataGrid);
+            scrollViewer?.ScrollToHorizontalOffset(targetOffset);
+        }
+
         private void UpdateMinimapIndicator(ScrollViewer sv)
         {
-            if (sv == null || sv.ExtentHeight == 0) return;
+            if (sv == null) return;
 
-            // 1. 获取概览条画布的实际高度
-            double canvasHeight = MinimapCanvas.ActualHeight;
+            // 垂直 Minimap（行模式）：按垂直滚动更新阴影块
+            if (sv.ExtentHeight > 0)
+            {
+                double canvasHeight = MinimapCanvas.ActualHeight;
+                double viewPortFactor = sv.ViewportHeight / sv.ExtentHeight;
+                double offsetFactor = sv.VerticalOffset / sv.ExtentHeight;
+                ViewportIndicator.Height = canvasHeight * viewPortFactor;
+                Canvas.SetTop(ViewportIndicator, canvasHeight * offsetFactor);
+            }
 
-            // 2. 计算比例：视口高度 / 总高度
-            double viewPortFactor = sv.ViewportHeight / sv.ExtentHeight;
-            // 3. 计算偏移比例：垂直偏移 / 总高度
-            double offsetFactor = sv.VerticalOffset / sv.ExtentHeight;
-
-            // 4. 更新阴影块的高度和位置
-            ViewportIndicator.Height = canvasHeight * viewPortFactor;
-            Canvas.SetTop(ViewportIndicator, canvasHeight * offsetFactor);
+            // 水平 Minimap（列模式）：按水平滚动更新阴影块
+            if (sv.ExtentWidth > 0)
+            {
+                double canvasWidth = MinimapCanvasH.ActualWidth;
+                double viewPortFactorW = sv.ViewportWidth / sv.ExtentWidth;
+                double offsetFactorW = sv.HorizontalOffset / sv.ExtentWidth;
+                ViewportIndicatorH.Width = Math.Max(5, canvasWidth * viewPortFactorW);
+                Canvas.SetLeft(ViewportIndicatorH, canvasWidth * offsetFactorW);
+            }
         }
         private async void Window_Drop(object sender, DragEventArgs e)
         {

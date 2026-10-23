@@ -10,7 +10,7 @@
 	<sys:String x:Key="MenuAbout">_About</sys:String>
 	
 	<sys:String x:Key="MenuAbout_AboutTitle">About Excel Professional Comparator</sys:String>
-	<sys:String x:Key="MenuAbout_Version">Version: 1.1.1</sys:String>
+	<sys:String x:Key="MenuAbout_Version">Version: 1.2.0</sys:String>
 	<sys:String x:Key="MenuAbout_Description">A professional tool for comparing differences between two Excel files.</sys:String>
 	<sys:String x:Key="MenuAbout_InstructionsTitle">Instructions:</sys:String>
 	<sys:String x:Key="MenuAbout_Instruction1">1. Drag and drop two files to compare immediately.</sys:String>
@@ -30,9 +30,15 @@
     <sys:String x:Key="PasswordRequired">The following file is encrypted:</sys:String>
 
     <sys:String x:Key="KeyColumnsLabel">Key column settings:</sys:String>
+	<sys:String x:Key="KeyRowsLabel">Key row settings:</sys:String>
 	<sys:String x:Key="BtnReCompare">Recompare</sys:String>
 
+	<sys:String x:Key="CompareModeLabel">Compare mode:</sys:String>
+	<sys:String x:Key="RowModeLabel">Row Mode</sys:String>
+	<sys:String x:Key="ColumnModeLabel">Column Mode</sys:String>
+
 	<sys:String x:Key="ColumnHeaderFormat">Col {0}</sys:String>
+	<sys:String x:Key="RowHeaderFormat">Row {0}</sys:String>
 
 	<sys:String x:Key="StatusSelectFiles">Please select two Excel files to compare</sys:String>
 	<sys:String x:Key="StatusProcessing">Processing files, please wait...</sys:String>
@@ -55,7 +61,7 @@
 
 	<sys:String x:Key="SwitchLanguageFailedFormat">Switch language failed: {0}</sys:String>
 
-    <sys:String x:Key="Label_LeftFile">(&lt;-)</sys:String>
-    <sys:String x:Key="Label_RightFile">(-&gt;)</sys:String>
+    <sys:String x:Key="Label_LeftFile">(&lt;-|Up)</sys:String>
+    <sys:String x:Key="Label_RightFile">(-&gt;|Down)</sys:String>
 
 </ResourceDictionary>

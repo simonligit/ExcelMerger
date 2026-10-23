@@ -27,6 +27,9 @@ namespace ExcelMerger.Models
         // 存储该行在原始文件中的行号（从 1 开始）
         [ObservableProperty]
         private int _originalIndex;
+
+        // 列模式下使用：记录每个对齐列的状态（列索引 -> 状态），用于整列高亮显示
+        public Dictionary<int, string> ColumnStatusMap { get; set; } = new();
         
         // 获取用于逻辑匹配的“关键特征”：默认取第一个非空单元格
         public string GetKey() => Cells.FirstOrDefault(c => !string.IsNullOrWhiteSpace(c))?.Trim() ?? string.Empty;
